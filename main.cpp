@@ -1,41 +1,25 @@
 #include <raylib.h>
+#define GRAVITY 980
+#define JUMP_SPEED 200
 
 int main(void) {
-  enum GameState { JUMPING, FALLING, ON_GROUND, OVER };
-  const int JUMP_HEIGHT{100};
-
-  GameState state = ON_GROUND;
-
   InitWindow(800, 600, "Khukuri");
   SetTargetFPS(60);
 
   Vector2 position{100, 300};
-  Vector2 fallVelocity{100, 20};
-  Vector2 jumpVelocity{100, 500};
+  Vector2 velocity{100, 20};
 
   Rectangle player{position.x, position.y, 50, 100};
   Rectangle ground{0, 400, 800, 200};
   while (!WindowShouldClose()) {
     float dt = GetFrameTime();
-    if (IsKeyPressed(KEY_UP) && state != FALLING) {
-      state = JUMPING;
-      ;
+    if (IsKeyPressed(KEY_UP)) {
+      velocity.y = -JUMP_SPEED;
     }
-    if (state == JUMPING) {
-      player.y -= jumpVelocity.y * dt;
-      jumpVelocity.y -= 20;
-      if (jumpVelocity.y == 0) {
-        state = FALLING;
-        jumpVelocity.y = 500;
-      }
-    }
-    if (state == FALLING) {
-      fallVelocity.y += 20;
-      player.y += fallVelocity.y * dt;
-    }
-    if (CheckCollisionRecs(player, ground)) {
-      fallVelocity.y = 20;
-      state = ON_GROUND;
+    velocity.y += GRAVITY * dt;
+    player.y += velocity.y * dt;
+    if (CheckCollisionRecs(player, ground) && velocity.y > 0) {
+      velocity.y = 0;
       player.y = ground.y - player.height;
     }
 
